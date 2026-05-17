@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>阿深越南蔬食 — 線上菜單</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Sans:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="menu-items.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --green:      #1a5c2a;
+    --green-dark: #124020;
+    --green-light:#e8f2eb;
+    --gold:       #c8a030;
+    --bg:         #f7f5f0;
+    --card:       #ffffff;
+    --text:       #1a1a18;
+    --muted:      #6b6b60;
+    --border:     #e4e0d8;
+    --radius:     12px;
+    --max-w:      430px;
+  }
+
+  body {
+    font-family: 'Noto Sans TC', 'Noto Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  #app {
+    width: 100%;
+    max-width: var(--max-w);
+    min-height: 100vh;
+    background: var(--bg);
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* ── LANG BAR ── */
+  #lang-bar {
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    background: var(--green);
+    display: flex;
+    gap: 6px;
+    padding: 8px 16px;
+    justify-content: center;
+  }
+
+  .lang-btn {
+    background: transparent;
+    border: 1.5px solid rgba(255,255,255,0.5);
+    color: rgba(255,255,255,0.75);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all .18s;
+    white-space: nowrap;
+    font-family: inherit;
+  }
+  .lang-btn.active {
+    background: #fff;
+    border-color: #fff;
+    color: var(--green);
+    font-weight: 700;
+  }
+
+  /* ── HERO ── */
+  #hero {
+    position: relative;
+    width: 100%;
+    height: 210px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  #hero img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 30%;
+  }
+  #hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(10,35,15,.15) 0%, rgba(10,35,15,.72) 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 16px 20px;
+  }
+  #store-name-hero {
+    font-size: 26px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.2;
+    text-shadow: 0 1px 6px rgba(0,0,0,.4);
+  }
+  #store-sub-hero {
+    font-size: 13px;
+    color: rgba(255,255,255,.8);
+    margin-top: 3px;
+    font-style: italic;
+  }
+
+  /* ── STORE INFO ── */
+  #store-info {
+    background: var(--green-dark);
+    color: rgba(255,255,255,.9);
+    padding: 12px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .info-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 13px;
+    line-height: 1.4;
+  }
+  .info-icon {
+    font-size: 15px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .info-text a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  /* ── CATEGORY TABS ── */
+  #cat-bar {
+    position: sticky;
+    top: 48px;
+    z-index: 190;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  #cat-bar::-webkit-scrollbar { display: none; }
+  #cat-tabs {
+    display: flex;
+    gap: 0;
+    padding: 0 8px;
+    white-space: nowrap;
+    min-width: max-content;
+  }
+  .cat-tab {
+    display: inline-block;
+    padding: 11px 14px;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2.5px solid transparent;
+    transition: all .18s;
+    user-select: none;
+    font-family: inherit;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+  }
+  .cat-tab.active {
+    color: var(--green);
+    border-bottom-color: var(--green);
+    font-weight: 700;
+  }
+
+  /* ── MENU SECTIONS ── */
+  #menu-content {
+    padding: 0 0 80px;
+  }
+
+  .cat-section { }
+
+  .cat-heading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 20px 16px 10px;
+  }
+  .cat-heading-text {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--green);
+  }
+  .cat-heading-viet {
+    font-size: 11px;
+    color: var(--muted);
+    font-style: italic;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+  }
+  .cat-heading-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .item-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  /* ── MENU CARD ── */
+  .item-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 13px 16px;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background .15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .item-card:first-child { border-top: 1px solid var(--border); }
+  .item-card:active { background: var(--green-light); }
+
+  .item-emoji-wrap {
+    width: 64px;
+    height: 64px;
+    border-radius: 10px;
+    background: var(--green-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 34px;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+  .item-emoji-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 10px;
+  }
+
+  .item-body {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .item-name {
+    font-size: 15.5px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.3;
+    white-space: normal;
+    word-break: break-word;
+  }
+  .item-note-badge {
+    display: inline-block;
+    background: var(--gold);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: 10px;
+    vertical-align: middle;
+    margin-left: 5px;
+  }
+
+  .item-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .tag-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .item-price {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--green);
+    flex-shrink: 0;
+    text-align: right;
+  }
+  .item-price-small {
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 400;
+    display: block;
+  }
+
+  /* ── MODAL ── */
+  #modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 500;
+    background: rgba(0,0,0,.55);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    align-items: flex-end;
+    justify-content: center;
+  }
+  #modal-overlay.open {
+    display: flex;
+    animation: fadeIn .18s ease;
+  }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  #modal-sheet {
+    background: var(--card);
+    width: 100%;
+    max-width: var(--max-w);
+    border-radius: 20px 20px 0 0;
+    max-height: 92vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    animation: slideUp .25s cubic-bezier(.32,0,.67,0) reverse, slideUp .25s cubic-bezier(.33,1,.68,1);
+  }
+  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+  #modal-hero {
+    width: 100%;
+    height: 220px;
+    background: var(--green-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 90px;
+    position: relative;
+    border-radius: 20px 20px 0 0;
+    overflow: hidden;
+    touch-action: pinch-zoom;
+  }
+  #modal-hero img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  #modal-close {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    width: 32px;
+    height: 32px;
+    background: rgba(0,0,0,.45);
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: inherit;
+    line-height: 1;
+  }
+
+  #modal-body {
+    padding: 20px 20px 36px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  #modal-name {
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.25;
+    color: var(--text);
+  }
+  #modal-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  #modal-price-block {
+    background: var(--green-light);
+    border-radius: 10px;
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .modal-price-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 15px;
+  }
+  .modal-price-label { color: var(--muted); }
+  .modal-price-val { font-weight: 700; color: var(--green); font-size: 17px; }
+  .modal-price-single { font-size: 24px; font-weight: 800; color: var(--green); }
+
+  .modal-field-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    margin-bottom: 4px;
+  }
+  .modal-field-text {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+  .modal-divider {
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── FOOTER ── */
+  #footer {
+    text-align: center;
+    padding: 24px 20px;
+    font-size: 12px;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+    background: var(--card);
+  }
+
+  /* ── LANG FONT OVERRIDE ── */
+  .lang-ja { font-family: 'Noto Sans JP', 'Noto Sans', sans-serif; }
+  .lang-ko { font-family: 'Noto Sans KR', 'Noto Sans', sans-serif; }
+  .lang-en { font-family: 'Noto Sans', sans-serif; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- Language bar -->
+  <div id="lang-bar">
+    <button class="lang-btn active" onclick="setLang('zh')">繁中</button>
+    <button class="lang-btn" onclick="setLang('en')">EN</button>
+    <button class="lang-btn" onclick="setLang('ja')">日本語</button>
+    <button class="lang-btn" onclick="setLang('ko')">한국어</button>
+  </div>
+
+  <!-- Hero photo -->
+  <div id="hero">
+    <img src="images/hero.png" alt="阿深越南蔬食" loading="eager">
+    <div id="hero-overlay">
+      <div id="store-name-hero">阿深越南蔬食</div>
+      <div id="store-sub-hero">QUÁN ĂN CHAY VIỆT NAM</div>
+    </div>
+  </div>
+
+  <!-- Store info -->
+  <div id="store-info">
+    <div class="info-row">
+      <span class="info-icon">📍</span>
+      <span class="info-text" id="info-address">南投縣埔里鎮中正路577號</span>
+    </div>
+    <div class="info-row">
+      <span class="info-icon">📞</span>
+      <span class="info-text"><a href="tel:0492997150">049-299-7150</a></span>
+    </div>
+  </div>
+
+  <!-- Category tabs -->
+  <div id="cat-bar">
+    <div id="cat-tabs"></div>
+  </div>
+
+  <!-- Menu content -->
+  <div id="menu-content"></div>
+
+  <!-- Footer -->
+  <div id="footer">
+    <span id="footer-text">全素餐廳 · 歡迎光臨</span>
+  </div>
+
+</div>
+
+<!-- Modal -->
+<div id="modal-overlay" onclick="handleOverlayClick(event)">
+  <div id="modal-sheet">
+    <div id="modal-hero">
+      <span id="modal-emoji"></span>
+      <button id="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div id="modal-body">
+      <div id="modal-name"></div>
+      <div id="modal-tags"></div>
+      <div id="modal-price-block"></div>
+      <div id="modal-desc-wrap" style="display:none">
+        <div class="modal-divider"></div>
+        <div class="modal-field-label" id="modal-desc-label"></div>
+        <div class="modal-field-text" id="modal-desc-text"></div>
+      </div>
+      <div id="modal-note-wrap" style="display:none">
+        <div class="modal-divider"></div>
+        <div class="modal-field-label" id="modal-note-label"></div>
+        <div class="modal-field-text" id="modal-note-text"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── State ───────────────────────────────────────────────────────────────────
+var currentLang = localStorage.getItem('lang') || 'zh';
+var savedScrollY = 0;
+
+// ─── Static data ─────────────────────────────────────────────────────────────
+var storeData = {
+  name: {
+    zh: '阿深越南蔬食',
+    en: 'A Shen Vietnamese Vegetarian',
+    ja: 'アーシェン ベトナム菜食',
+    ko: '아선 베트남 채식',
+  },
+  sub: {
+    zh: 'QUÁN ĂN CHAY VIỆT NAM',
+    en: 'QUÁN ĂN CHAY VIỆT NAM',
+    ja: 'QUÁN ĂN CHAY VIỆT NAM',
+    ko: 'QUÁN ĂN CHAY VIỆT NAM',
+  },
+  address: {
+    zh: '南投縣埔里鎮中正路577號',
+    en: '577 Zhongzheng Rd., Puli Township, Nantou',
+    ja: '南投県埔里鎮中正路577号',
+    ko: '난터우현 푸리진 중정로 577호',
+  },
+  footer: {
+    zh: '全素餐廳 · 歡迎光臨',
+    en: 'All-vegetarian restaurant · Welcome',
+    ja: '完全菜食レストラン · ようこそ',
+    ko: '완전 채식 레스토랑 · 환영합니다',
+  },
+};
+
+var tagConfig = {
+  'R':  { icon: '⭐', zh: '本店推薦', en: 'Recommended',           ja: 'おすすめ',        ko: '추천'             },
+  '1':  { icon: '🌶️', zh: '小辣',     en: 'Mild Spicy',             ja: '少し辛い',        ko: '약간 매운'        },
+  '2':  { icon: '🌶️🌶️', zh: '中辣', en: 'Medium Spicy',           ja: '中辛',            ko: '보통 매운'        },
+  '3':  { icon: '🔥', zh: '大辣',     en: 'Very Spicy',             ja: '激辛',            ko: '매우 매운'        },
+  'P':  { icon: '🐷', zh: '含豬肉',   en: 'Contains Pork',          ja: '豚肉入り',        ko: '돼지고기 포함'    },
+  'B':  { icon: '🐂', zh: '含牛肉',   en: 'Contains Beef',          ja: '牛肉入り',        ko: '소고기 포함'      },
+  'L':  { icon: '🐑', zh: '含羊肉',   en: 'Contains Lamb',          ja: 'ラム入り',        ko: '양고기 포함'      },
+  'V':  { icon: '🥬', zh: '素食',     en: 'Vegetarian',             ja: 'ベジタリアン',    ko: '채식'             },
+  'V5': { icon: '🧄', zh: '五辛素',   en: 'Plant-based w/ Allium',  ja: '五葷あり精進',    ko: '오신채 포함 채식' },
+  'H':  { icon: '☪️', zh: '清真認證', en: 'Halal Certified',        ja: 'ハラール認証',    ko: '할랄 인증'        },
+};
+
+var marketLabel = { zh: '時價', en: 'Market Price', ja: '時価', ko: '시가' };
+var descLabel   = { zh: '說明', en: 'Description',  ja: '説明', ko: '설명' };
+var noteLabel   = { zh: '備註', en: 'Note',          ja: '備考', ko: '비고' };
+
+var catViet = {
+  noodle_soup: 'MÓN ĂN NƯỚC',
+  stir_fry:    'MÓN ĂN XÀO',
+  dry:         'MÓN ĂN KHÔ',
+  soup:        'CANH',
+  drink:       'NƯỚC UỐNG',
+  dessert:     'BÁNH NGỌT',
+};
+
+var seasonalLabel = { zh: '季節', en: 'Seasonal', ja: '季節', ko: '계절' };
+
+// ─── Font class by lang ───────────────────────────────────────────────────────
+function fontClass(lang) {
+  if (lang === 'ja') return 'lang-ja';
+  if (lang === 'ko') return 'lang-ko';
+  if (lang === 'en') return 'lang-en';
+  return '';
+}
+
+// ─── Format price ─────────────────────────────────────────────────────────────
+function fmtPrice(val, lang) {
+  if (val === 'market') return marketLabel[lang];
+  return 'NT$' + val;
+}
+
+// ─── Render category tabs ─────────────────────────────────────────────────────
+function renderTabs() {
+  var tabs = document.getElementById('cat-tabs');
+  var cats = Object.keys(menuCategories);
+  tabs.innerHTML = cats.map(function(cat) {
+    return '<button class="cat-tab" data-cat="' + cat + '" onclick="scrollToSection(\'' + cat + '\')">'
+      + menuCategories[cat][currentLang]
+      + '</button>';
+  }).join('');
+}
+
+// ─── Render menu ──────────────────────────────────────────────────────────────
+function renderMenu() {
+  var content = document.getElementById('menu-content');
+  var cats = Object.keys(menuCategories);
+  var html = '';
+
+  cats.forEach(function(cat) {
+    var items = menuItems.filter(function(i) { return i.category === cat; });
+    if (!items.length) return;
+
+    html += '<div class="cat-section" id="section-' + cat + '">';
+    html += '<div class="cat-heading">';
+    html += '<div>';
+    html += '<div class="cat-heading-text">' + menuCategories[cat][currentLang] + '</div>';
+    html += '<div class="cat-heading-viet">' + (catViet[cat] || '') + '</div>';
+    html += '</div>';
+    html += '<div class="cat-heading-line"></div>';
+    html += '</div>';
+    html += '<div class="item-list">';
+
+    items.forEach(function(item) {
+      html += renderCard(item);
+    });
+
+    html += '</div></div>';
+  });
+
+  content.innerHTML = html;
+}
+
+function renderCard(item) {
+  var lang = currentLang;
+  var name = item.names[lang];
+  var hasNote = item.note && item.note[lang];
+  var isSeasonal = hasNote && (item.note.zh === '季節限定');
+
+  // Price summary for card
+  var priceHtml = '';
+  if (item.price.length === 1) {
+    priceHtml = '<div class="item-price">' + fmtPrice(item.price[0].value, lang) + '</div>';
+  } else {
+    var vals = item.price.filter(function(p) { return typeof p.value === 'number'; }).map(function(p) { return p.value; });
+    if (vals.length) {
+      var min = Math.min.apply(null, vals), max = Math.max.apply(null, vals);
+      var rangeStr = min === max ? 'NT$' + min : 'NT$' + min + '–' + max;
+      priceHtml = '<div class="item-price">' + rangeStr + '</div>';
+    } else {
+      priceHtml = '<div class="item-price">' + marketLabel[lang] + '</div>';
+    }
+  }
+
+  // Tags
+  var tagsHtml = '';
+  if (item.tags && item.tags.length) {
+    tagsHtml = '<div class="item-tags">';
+    item.tags.forEach(function(t) {
+      if (tagConfig[t]) {
+        tagsHtml += '<span class="tag-badge">' + tagConfig[t].icon + ' ' + tagConfig[t][lang] + '</span>';
+      }
+    });
+    tagsHtml += '</div>';
+  }
+
+  // Media
+  var mediaHtml = '';
+  if (item.image) {
+    mediaHtml = '<div class="item-emoji-wrap"><img src="images/' + item.image + '" alt="" loading="lazy"></div>';
+  } else {
+    mediaHtml = '<div class="item-emoji-wrap">' + item.emoji + '</div>';
+  }
+
+  var seasonBadge = isSeasonal ? '<span class="item-note-badge">' + seasonalLabel[lang] + '</span>' : '';
+
+  return '<div class="item-card" onclick="openModal(\'' + item.id + '\')">'
+    + mediaHtml
+    + '<div class="item-body">'
+    +   '<div class="item-name">' + name + seasonBadge + '</div>'
+    +   tagsHtml
+    + '</div>'
+    + priceHtml
+    + '</div>';
+}
+
+// ─── Update static text ───────────────────────────────────────────────────────
+function updateStaticText() {
+  var lang = currentLang;
+  var fc = fontClass(lang);
+
+  document.documentElement.lang = lang === 'zh' ? 'zh-TW' : lang;
+  document.body.className = fc;
+
+  document.getElementById('store-name-hero').textContent = storeData.name[lang];
+  document.getElementById('store-sub-hero').textContent  = storeData.sub[lang];
+  document.getElementById('info-address').textContent    = storeData.address[lang];
+  document.getElementById('footer-text').textContent     = storeData.footer[lang];
+}
+
+// ─── Active tab on scroll ─────────────────────────────────────────────────────
+function updateActiveTab() {
+  var cats = Object.keys(menuCategories);
+  var scrollY = window.scrollY + 120;
+
+  var activeCat = cats[0];
+  cats.forEach(function(cat) {
+    var el = document.getElementById('section-' + cat);
+    if (el && el.offsetTop <= scrollY) activeCat = cat;
+  });
+
+  document.querySelectorAll('.cat-tab').forEach(function(btn) {
+    btn.classList.toggle('active', btn.dataset.cat === activeCat);
+  });
+}
+
+window.addEventListener('scroll', updateActiveTab, { passive: true });
+
+// ─── Scroll to category ───────────────────────────────────────────────────────
+function scrollToSection(cat) {
+  var el = document.getElementById('section-' + cat);
+  if (!el) return;
+  var offset = el.offsetTop - 96;
+  window.scrollTo({ top: offset, behavior: 'smooth' });
+}
+
+// ─── Language switch ──────────────────────────────────────────────────────────
+function setLang(lang) {
+  currentLang = lang;
+  localStorage.setItem('lang', lang);
+  document.querySelectorAll('.lang-btn').forEach(function(btn) {
+    btn.classList.toggle('active', btn.textContent.trim() === { zh:'繁中', en:'EN', ja:'日本語', ko:'한국어' }[lang]);
+  });
+  updateStaticText();
+  renderTabs();
+  renderMenu();
+  updateActiveTab();
+}
+
+// ─── Modal ────────────────────────────────────────────────────────────────────
+function openModal(itemId) {
+  var item = menuItems.find(function(i) { return i.id === itemId; });
+  if (!item) return;
+  savedScrollY = window.scrollY;
+
+  var lang = currentLang;
+
+  // Hero
+  var hero = document.getElementById('modal-hero');
+  var emojiEl = document.getElementById('modal-emoji');
+  if (item.image) {
+    emojiEl.style.display = 'none';
+    if (!hero.querySelector('img.modal-img')) {
+      var img = document.createElement('img');
+      img.className = 'modal-img';
+      hero.insertBefore(img, emojiEl);
+    }
+    hero.querySelector('img.modal-img').src = 'images/' + item.image;
+  } else {
+    emojiEl.style.display = '';
+    emojiEl.textContent = item.emoji;
+    var existImg = hero.querySelector('img.modal-img');
+    if (existImg) existImg.remove();
+  }
+
+  // Name
+  document.getElementById('modal-name').textContent = item.names[lang];
+
+  // Tags
+  var tagsDiv = document.getElementById('modal-tags');
+  if (item.tags && item.tags.length) {
+    tagsDiv.innerHTML = item.tags.map(function(t) {
+      return tagConfig[t] ? '<span class="tag-badge">' + tagConfig[t].icon + ' ' + tagConfig[t][lang] + '</span>' : '';
+    }).join('');
+    tagsDiv.style.display = 'flex';
+  } else {
+    tagsDiv.innerHTML = '';
+    tagsDiv.style.display = 'none';
+  }
+
+  // Price
+  var priceBlock = document.getElementById('modal-price-block');
+  if (item.price.length === 1 && !item.price[0].label) {
+    priceBlock.innerHTML = '<div class="modal-price-single">' + fmtPrice(item.price[0].value, lang) + '</div>';
+  } else {
+    priceBlock.innerHTML = item.price.map(function(p) {
+      var labelStr = p.label ? p.label[lang] : '';
+      return '<div class="modal-price-row">'
+        + '<span class="modal-price-label">' + labelStr + '</span>'
+        + '<span class="modal-price-val">' + fmtPrice(p.value, lang) + '</span>'
+        + '</div>';
+    }).join('');
+  }
+
+  // Desc
+  var descWrap = document.getElementById('modal-desc-wrap');
+  var descText = item.desc && item.desc[lang];
+  if (descText) {
+    document.getElementById('modal-desc-label').textContent = descLabel[lang];
+    document.getElementById('modal-desc-text').textContent  = descText;
+    descWrap.style.display = 'block';
+  } else {
+    descWrap.style.display = 'none';
+  }
+
+  // Note
+  var noteWrap = document.getElementById('modal-note-wrap');
+  var noteText = item.note && item.note[lang];
+  if (noteText) {
+    document.getElementById('modal-note-label').textContent = noteLabel[lang];
+    document.getElementById('modal-note-text').textContent  = noteText;
+    noteWrap.style.display = 'block';
+  } else {
+    noteWrap.style.display = 'none';
+  }
+
+  document.getElementById('modal-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+  window.scrollTo({ top: savedScrollY, behavior: 'instant' });
+}
+
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById('modal-overlay')) closeModal();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeModal();
+});
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+updateStaticText();
+renderTabs();
+renderMenu();
+updateActiveTab();
+
+// Set correct active lang button on load
+document.querySelectorAll('.lang-btn').forEach(function(btn) {
+  btn.classList.toggle('active', btn.textContent.trim() === { zh:'繁中', en:'EN', ja:'日本語', ko:'한국어' }[currentLang]);
+});
+</script>
+</body>
+</html>
